@@ -80,7 +80,7 @@ public class listPermission extends AndroidNonvisibleComponent
       }
 
       @SimpleFunction(description = "Checks whether the mentioned permission has been granted, it will return true or false.")
-      public boolean CheckSiglePermission(String permission) {
+      public boolean CheckSinglePermission(String permission) {
             if (ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED)
                   return true;
             else
