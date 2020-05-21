@@ -16,14 +16,12 @@ import com.google.appinventor.components.annotations.SimpleFunction;
 import com.google.appinventor.components.annotations.SimpleObject;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.runtime.AndroidNonvisibleComponent;
-import com.google.appinventor.components.annotations.UsesPermissions;
 import com.google.appinventor.components.runtime.ComponentContainer;
 import com.google.appinventor.components.runtime.EventDispatcher;
 import com.google.appinventor.components.runtime.util.YailList;
 
-@DesignerComponent(version = 1, description = "Request list permission <br> Developed by Jarlisson", category = ComponentCategory.EXTENSION, nonVisible = true, iconName = "https://image.flaticon.com/icons/png/512/1468/1468166.png") // //
+@DesignerComponent(version = 1, description = "Request list permission <br> Developed by Jarlisson", category = ComponentCategory.EXTENSION, nonVisible = true, iconName = "https://image.flaticon.com/icons/png/512/1468/1468166.png",helpUrl="https://github.com/jarlisson2/ListPermissionAIX") // //
 @SimpleObject(external = true)
-@UsesPermissions(permissionNames = "android.permission.RECORD_AUDIO, android.permission.MODIFY_AUDIO_SETTINGS, android.permission.CAMERA, android.permission.WRITE_EXTERNAL_STORAGE")
 public class listPermission extends AndroidNonvisibleComponent
             implements ActivityCompat.OnRequestPermissionsResultCallback {
 
