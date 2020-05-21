@@ -65,8 +65,8 @@ public class listPermission extends AndroidNonvisibleComponent
       }
 
       @SimpleFunction(description = "In a list of permissions, a window will open for the user, whether or not to allow permissions that have not been granted.")
-      public void RequestListPermission(YailList permissions) {
-            String[] permissionListString = permissions.toStringArray();
+      public void RequestPermission(YailList listPermissions) {
+            String[] permissionListString = listPermissions.toStringArray();
             List<String> permissionList = new ArrayList<>();
             for (String permission : permissionListString) {
                   if (ContextCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED) {
@@ -100,7 +100,7 @@ public class listPermission extends AndroidNonvisibleComponent
       }
 
       @SimpleFunction(description = "Parses a whitelist and returns an event (ResultCheckMultiplePermission) with a denied and allowed whitelist.")
-      public void CheckMultiplePermission(YailList listPermissions) {
+      public void CheckMultiplePermissions(YailList listPermissions) {
             String[] permissionListString = listPermissions.toStringArray();
             List<String> permissionListGrated = new ArrayList<>();
             List<String> permissionListDanied = new ArrayList<>();
@@ -114,12 +114,12 @@ public class listPermission extends AndroidNonvisibleComponent
             }
             final YailList listPermissionsGrated = YailList.makeList(permissionListGrated);
             final YailList listPermissionsDanied = YailList.makeList(permissionListDanied);
-            ResultCheckMultiplePermission(listPermissionsGrated, listPermissionsDanied);
+            ResultCheckMultiplePermissions(listPermissionsGrated, listPermissionsDanied);
       }
 
       @SimpleEvent(description = "CheckMultiplePermission result.")
-      public void ResultCheckMultiplePermission(YailList listPermissionsGrated, YailList listPermissionsDanied) {
-            EventDispatcher.dispatchEvent(this, "ResultCheckMultiplePermission", listPermissionsGrated,
+      public void ResultCheckMultiplePermissions(YailList listPermissionsGrated, YailList listPermissionsDanied) {
+            EventDispatcher.dispatchEvent(this, "ResultCheckMultiplePermissions", listPermissionsGrated,
                         listPermissionsDanied);
       }
 
