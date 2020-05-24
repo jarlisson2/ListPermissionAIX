@@ -5,78 +5,78 @@ import java.util.ArrayList;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.support.annotation.NonNull;
+import android.net.Uri;
+import android.os.Build;
+import android.os.Handler;
+import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-
+import android.widget.Toast;
 import com.google.appinventor.components.annotations.DesignerComponent;
 import com.google.appinventor.components.annotations.SimpleEvent;
 import com.google.appinventor.components.annotations.SimpleFunction;
 import com.google.appinventor.components.annotations.SimpleObject;
+import com.google.appinventor.components.annotations.UsesActivities;
+import com.google.appinventor.components.annotations.androidmanifest.ActivityElement;
 import com.google.appinventor.components.common.ComponentCategory;
+import com.google.appinventor.components.runtime.ActivityResultListener;
 import com.google.appinventor.components.runtime.AndroidNonvisibleComponent;
+import com.google.appinventor.components.runtime.Component;
 import com.google.appinventor.components.runtime.ComponentContainer;
 import com.google.appinventor.components.runtime.EventDispatcher;
+import com.google.appinventor.components.runtime.Form;
+import com.google.appinventor.components.runtime.ReplForm;
 import com.google.appinventor.components.runtime.util.YailList;
 
-@DesignerComponent(version = 1, description = "Request list permission <br> Developed by Jarlisson", category = ComponentCategory.EXTENSION, nonVisible = true, iconName = "https://image.flaticon.com/icons/png/512/1468/1468166.png",helpUrl="https://github.com/jarlisson2/ListPermissionAIX") // //
+@DesignerComponent(version = 2, description = "Request list permission <br> Developed by Jarlisson", category = ComponentCategory.EXTENSION, nonVisible = true, iconName = "https://image.flaticon.com/icons/png/512/1468/1468166.png", helpUrl = "https://github.com/jarlisson2/ListPermissionAIX") // //
+@UsesActivities(activities = {
+            @ActivityElement(name = "com.jdl.Permission.classPermissions", theme = "@android:style/Theme.Translucent.NoTitleBar") })
 @SimpleObject(external = true)
-public class listPermission extends AndroidNonvisibleComponent
-            implements ActivityCompat.OnRequestPermissionsResultCallback {
 
+public class listPermission extends AndroidNonvisibleComponent implements Component, ActivityResultListener {
       public Activity activity;
       public Context context;
-
-      public void ReturnRequestPermission(YailList listPermissionsGrated, YailList listPermissionsDanied) {
-            this.OnPermissionRequest(listPermissionsGrated, listPermissionsDanied);
-      }
-
-      final int PERMISSION_REQUEST_CODE = 200;
+      public boolean isRepl = false;
+      private int PERMISSION_REQUEST_CODE = 200;
+      private ComponentContainer container;
+      private int requestCode = 0;
 
       public listPermission(ComponentContainer container) {
             super(container.$form());
+            this.container = container;
             context = container.$context();
             activity = (Activity) context;
-
-      }
-      @Override
-      public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                  @NonNull int[] grantResults) {
-            if (requestCode == PERMISSION_REQUEST_CODE) {
-                  List<String> permissionListGrated = new ArrayList<>();
-                  List<String> permissionListDanied = new ArrayList<>();
-                  for (int i = 0; i < permissions.length; i++) {
-                        if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
-                              permissionListGrated.add(permissions[i]);
-                        } else {
-                              permissionListDanied.add(permissions[i]);
-                        }
-                  }
-                  final YailList listPermissionsGrated = YailList.makeList(permissionListGrated);
-                  final YailList listPermissionsDanied = YailList.makeList(permissionListDanied);
-                  activity.runOnUiThread(new Runnable() {
-                        public void run() {
-                              OnPermissionRequest(listPermissionsGrated, listPermissionsDanied);
-                        }
-                  });
+            if (form instanceof ReplForm) {
+                  isRepl = true;
             }
-
       }
 
       @SimpleFunction(description = "In a list of permissions, a window will open for the user, whether or not to allow permissions that have not been granted.")
       public void RequestPermission(YailList listPermissions) {
             String[] permissionListString = listPermissions.toStringArray();
-            List<String> permissionList = new ArrayList<>();
-            for (String permission : permissionListString) {
-                  if (ContextCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED) {
-                        permissionList.add(permission);
+            if (isRepl) {
+                  List<String> permissionList = new ArrayList<>();
+                  for (String permission : permissionListString) {
+                        if (ContextCompat.checkSelfPermission(context,
+                                    permission) != PackageManager.PERMISSION_GRANTED) {
+                              permissionList.add(permission);
+                        }
                   }
+                  if (!permissionList.isEmpty()) {
+                        ActivityCompat.requestPermissions((Activity) context,
+                                    permissionList.toArray(new String[permissionList.size()]), PERMISSION_REQUEST_CODE);
+                  }
+            } else {
+                  Intent intent = new Intent((Context) form, classPermissions.class);
+                  intent.putExtra("listReceiver", permissionListString);
+                  intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+                  if (requestCode == 0)
+                        requestCode = form.registerForActivityResult(this);
+                  container.$context().startActivityForResult(intent, requestCode);
             }
-            if (!permissionList.isEmpty()) {
-                  ActivityCompat.requestPermissions((Activity) context,
-                              permissionList.toArray(new String[permissionList.size()]), PERMISSION_REQUEST_CODE);
-            }
+
       }
 
       @SimpleFunction(description = "Checks whether the mentioned permission has been granted, it will return true or false.")
@@ -124,8 +124,23 @@ public class listPermission extends AndroidNonvisibleComponent
       }
 
       @SimpleEvent(description = "RequestListPermission result.")
-      public void OnPermissionRequest(YailList listPermissionsGrated, YailList listPermissionsDanied) {
-            EventDispatcher.dispatchEvent(this, "OnPermissionRequest", listPermissionsGrated, listPermissionsDanied);
+      public void OnPermissionRequest(YailList listPermissionsGrated, YailList listPermissionsDanied,
+                  boolean grantedAll) {
+            EventDispatcher.dispatchEvent(this, "OnPermissionRequest", listPermissionsGrated, listPermissionsDanied,
+                        grantedAll);
+
+      }
+
+      @Override
+      public void resultReturned(int requestCode, int resultCode, Intent data) {
+            if (resultCode == -1) {
+                  String[] listGranted = data.getExtras().getStringArray("Granted");
+                  String[] listDanied = data.getExtras().getStringArray("Danied");
+                  final YailList listPermissionsGrated = YailList.makeList(listGranted);
+                  final YailList listPermissionsDanied = YailList.makeList(listDanied);
+                  final boolean grantedAll = listGranted.length > 0 && listDanied.length == 0 ? true : false;
+                  OnPermissionRequest(listPermissionsGrated, listPermissionsDanied, grantedAll);
+            }
       }
 
 }
