@@ -30,7 +30,7 @@ import com.google.appinventor.components.runtime.Form;
 import com.google.appinventor.components.runtime.ReplForm;
 import com.google.appinventor.components.runtime.util.YailList;
 
-@DesignerComponent(version = 2, description = "Request list permission <br> Developed by Jarlisson", category = ComponentCategory.EXTENSION, nonVisible = true, iconName = "https://image.flaticon.com/icons/png/512/1468/1468166.png", helpUrl = "https://github.com/jarlisson2/ListPermissionAIX") // //
+@DesignerComponent(version = 2, description = "Request list permission <br> Developed by Jarlisson", category = ComponentCategory.EXTENSION, nonVisible = true, iconName = "aiwebres/imagePermission.png", helpUrl = "https://github.com/jarlisson2/ListPermissionAIX") // //
 @UsesActivities(activities = {
             @ActivityElement(name = "com.jdl.Permission.classPermissions", theme = "@android:style/Theme.Translucent.NoTitleBar") })
 @SimpleObject(external = true)
